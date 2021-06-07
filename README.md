@@ -49,3 +49,66 @@ Need to create a new file--myapi/serializers.py
     1. import the Hero model
     2. import the REST framework serializer
     3. create a new class that links the Hero with its serializer
+        ```
+        #serializers.py
+        from rest_framework import serializers
+        from .models import Hero
+
+        class HeroSerializer(serializers.HyperlinkedModelSerializer):
+            class Meta:
+                model = Hero
+                fields = ('name', 'alias')
+        ```
+5. Display the Data
+    - wire up the uRLs and views to display the data
+    1. need to render the different heroes in JSON format
+        - to do this we need to
+            1. Query the database for all heros
+            2. pass that database queryset into the serializer we just created
+                - it will get converted to JSON and rendered
+        In myapi/views.py
+
+            ```
+            from django.shortcuts import render
+            from rest_framework import viewsets
+            from .serializers import HeroSerializer
+            from .models import Hero
+
+
+            # Create your views here.
+            class HeroViewSet(viewsets.ModelViewSet):
+                queryset = Hero.objects.all().order_by('name')
+                serializer_class = HeroSerializer
+            ```
+        - ModelViewSet is a special view that Django Rest Framework provides
+            - it will handle GET and POST for Heros without us having to do more work
+    2. Site URLs
+        in django, URLs get resolved at the project level first. start with file myProject/urls.py
+        - add the URL for our API (for now put the URL at the index)    - added: path('', include('myapi.urls'))
+    3. API URLs
+        - we have to add a path in myapi/urls.py
+            ```
+            from django.urls import include, path
+            from rest_framework import routers
+            from . import views
+
+            router = routers.DefaultRouter()
+            router.register(r'heroes', views.HeroViewSet)
+
+            # wire up our API using automatic URL routing
+            # Additionally, we include login URLs for the browsable API
+            urlpatterns = [
+                path('', include(router.urls)),
+                path('api-auth/', include('rest_framework.urls', namespace='rest_Framework'))
+            ]
+            ```
+
+        - we added "router" imported from "rest_framework"
+            - REST framework router will make sure our requests end up at the right resource dynamically
+                - if we add or delete items from the database, the URLs will update to match. 
+        - a router works with a "viewset" (i.e views.py) to dynamically route requests. for a "router" to work, it needs to point to a viewset
+    as an exercise create villians!
+
+    Test it out
+        visit the endpoint via GET
+        GET /heros/
