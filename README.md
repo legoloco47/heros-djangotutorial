@@ -112,3 +112,9 @@ Need to create a new file--myapi/serializers.py
     Test it out
         visit the endpoint via GET
         GET /heros/
+
+My steps:
+1. Create Villian model in myapi/models.py
+2. Create Villian ViewSet in myapi/views.py
+2. Create Villian serializer in myapi/serializer.py
+3. Add Villians to router in myapi/urls.py 
